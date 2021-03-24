@@ -51,7 +51,7 @@
               <a
                 href=""
                 class="card-footer-item"
-                @click="setStatus(task.id, 'done')"
+                @click.prevent="setStatus(task.id, 'done')"
                 >Done</a
               >
             </footer>
@@ -69,6 +69,14 @@
         >
           <div class="card">
             <div class="card-content">{{ task.description }}</div>
+            <footer class="card-footer">
+              <a
+                href=""
+                class="card-footer-item"
+                @click.prevent="deleteTask(task.id)"
+                >Delete</a
+              >
+            </footer>
           </div>
         </div>
       </div>
@@ -134,9 +142,8 @@ export default {
       }
     },
     setStatus(task_id, status) {
-		
-		const task = this.tasks.filter(task => task.id === task_id)[0]
-		let description = task.description
+      const task = this.tasks.filter((task) => task.id === task_id)[0];
+      let description = task.description;
       axios({
         method: "put",
         url: "http://127.0.0.1:8000/tasks/" + task_id + "/",
@@ -145,16 +152,34 @@ export default {
         },
         data: {
           status: status,
-		  description: description
+          description: description,
         },
         auth: {
           username: "admin",
           password: "123123",
         },
       }).then(() => {
-		  task.status = status
-		  console.log(res.data)
-	  });
+        task.status = status;
+      });
+    },
+    deleteTask(task_id) {
+      axios({
+        method: "delete",
+        url: "http://127.0.0.1:8000/tasks/" + task_id + "/",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        auth: {
+          username: "admin",
+          password: "123123",
+        },
+      })
+        .then((res) => {
+		  this.tasks = this.tasks.filter(task => task.id !== task_id)
+        })
+        .catch((e) => {
+          console.log("error", e);
+        });
     },
   },
 };
